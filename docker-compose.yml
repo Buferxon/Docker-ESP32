@@ -1,0 +1,22 @@
+version: "2"
+services:
+  web:
+    build: docker/web
+    command: sh -c "php artisan migrate && apache2-foreground"
+    depends_on:
+      - db
+    ports:
+      - "8084:80"
+  db:
+    image: mysql:latest
+    volumes:
+      - db:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: blog
+      MYSQL_USER: blog
+      MYSQL_PASSWORD: password
+    ports:
+      - "3307:3306"
+volumes:
+  db:
