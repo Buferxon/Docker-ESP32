@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: laravel-app
+    env: docker
+    dockerfilePath: ./docker/web/Dockerfile
+    buildCommand: ""
+    startCommand: "sh -c 'php artisan migrate && apache2-foreground'"
+    plan: free
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        value: db
+      - key: DB_PORT
+        value: 3306
+      - key: DB_DATABASE
+        value: blog
+      - key: DB_USERNAME
+        value: blog
+      - key: DB_PASSWORD
+        value: password
+
+  - type: private_service
+    name: db
+    env: docker
+    dockerfilePath: ""
+    image: mysql:latest
+    plan: free
+    envVars:
+      - key: MYSQL_ROOT_PASSWORD
+        value: root
+      - key: MYSQL_DATABASE
+        value: blog
+      - key: MYSQL_USER
+        value: blog
+      - key: MYSQL_PASSWORD
+        value: password
