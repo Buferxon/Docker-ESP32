@@ -25,7 +25,11 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 
 
 # Clonar el proyecto
-RUN git clone https://github.com/Buferxon/Laravel-Esp32.git /var/www/html
+RUN if [ -d /var/www/html/.git ]; then \
+        cd /var/www/html && git pull; \
+    else \
+        git clone https://github.com/Buferxon/Laravel-Esp32.git /var/www/html; \
+    fi
 
 
 
