@@ -1,4 +1,4 @@
-FROM php:8.2-apache
+FROM php:8.4-apache
 
 # Instala dependencias y extensiones necesarias
 RUN apt-get update && apt-get install -y libzip-dev zip unzip \
@@ -26,7 +26,7 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 
 # Clonar el proyecto
 RUN if [ -d /var/www/html/.git ]; then \
-        cd /var/www/html && git pull; \
+        cd /var/www/html && git config --global --add safe.directory /var/www/html && git pull; \
     else \
         git clone https://github.com/Buferxon/Laravel-Esp32.git /var/www/html; \
     fi
