@@ -5,12 +5,14 @@ import joblib
 import pandas as pd
 from datetime import datetime, timedelta
 
-# Cargar el modelo y los escaladores
-model = load_model('modelo_clima.h5', custom_objects={'mse': MeanSquaredError()})
-scaler_X = joblib.load('scaler_X.pkl')
-scaler_y = joblib.load('scaler_y.pkl')
-label_encoder = joblib.load('label_encoder_sky.pkl')
+import os
 
+base_path = "/var/www/html/storage/app/public"
+
+model = load_model(os.path.join(base_path, "modelo_clima.h5"), custom_objects={'mse': MeanSquaredError()})
+label_encoder = joblib.load(os.path.join(base_path, "label_encoder_sky.pkl"))
+scaler_X = joblib.load(os.path.join(base_path, "scaler_X.pkl"))
+scaler_y = joblib.load(os.path.join(base_path, "scaler_y.pkl"))
 print(label_encoder.classes_)
 
 # Obtener la fecha y hora actual
