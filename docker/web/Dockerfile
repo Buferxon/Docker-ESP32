@@ -17,11 +17,18 @@ RUN apt-get update && apt-get install -y \
     zip \
     && curl -sL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs
-# Define el nuevo DocumentRoot
-RUN apt update && \
-    apt install -y python3 python3-pip python3-venv
+# Instalar dependencias
+RUN apt update && apt install -y python3 python3-pip python3-venv
 
-RUN pip3 install numpy pandas joblib keras tensorflow
+# Crear entorno virtual
+RUN python3 -m venv /opt/venv
+
+# Activar entorno virtual e instalar paquetes
+RUN /opt/venv/bin/pip install numpy pandas joblib keras tensorflow
+
+# Añadir entorno virtual al PATH (para usarlo en scripts o Laravel)
+ENV PATH="/opt/venv/bin:$PATH"
+
 
 # Instalar Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
