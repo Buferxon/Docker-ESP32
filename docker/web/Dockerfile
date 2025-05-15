@@ -18,7 +18,9 @@ RUN apt-get update && apt-get install -y \
     && curl -sL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs
 # Define el nuevo DocumentRoot
-RUN apt-get update && apt-get install -y python3 python3-pip
+RUN sudo apt install python3 python3-pip python3-venv -y
+
+RUN pip3 install numpy pandas joblib keras tensorflow
 # Instalar Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
