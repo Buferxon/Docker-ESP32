@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y \
     && curl -sL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs
 # Define el nuevo DocumentRoot
-
+RUN apt-get update && apt-get install -y python3 python3-pip
 # Instalar Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
@@ -31,7 +31,8 @@ RUN if [ -d /var/www/html/.git ]; then \
         git clone https://github.com/Buferxon/Laravel-Esp32.git /var/www/html; \
     fi
 
-
+    # Copiar todo lo de ./modelo a /var/www/html/storage/app/public
+COPY ./modelo /var/www/html/storage/app/public
 
 # Aplica el nuevo DocumentRoot en la configuración de Apache
 RUN sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf \
