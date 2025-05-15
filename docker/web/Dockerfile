@@ -24,7 +24,7 @@ RUN apt update && apt install -y python3 python3-pip python3-venv
 RUN python3 -m venv /opt/venv
 
 # Activar entorno virtual e instalar paquetes
-RUN /opt/venv/bin/pip install numpy pandas joblib keras tensorflow
+RUN /opt/venv/bin/pip install numpy pandas joblib keras tensorflow scikit-learn
 
 # Añadir entorno virtual al PATH (para usarlo en scripts o Laravel)
 ENV PATH="/opt/venv/bin:$PATH"
