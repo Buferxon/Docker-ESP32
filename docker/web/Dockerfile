@@ -63,6 +63,9 @@ RUN chown -R www-data:www-data /var/www/html \
 # Establece la carpeta del proyecto como directorio de trabajo
 WORKDIR /var/www/html
 
+
+RUN git config --global --add safe.directory /var/www/html && \
+    cd /var/www/html && git pull
 # Instala las dependencias de Composer
 RUN composer install
 
