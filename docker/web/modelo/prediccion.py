@@ -4,30 +4,25 @@ from tensorflow.keras.models import load_model
 import joblib
 import pandas as pd
 from datetime import datetime, timedelta
+import json
+# Cargar el modelo y los escaladores
+model = load_model('modelo_clima.h5', custom_objects={'mse': MeanSquaredError()})
+scaler_X = joblib.load('scaler_X.pkl')
+scaler_y = joblib.load('scaler_y.pkl')
+label_encoder = joblib.load('label_encoder_sky.pkl')
 
-import os
+# print(label_encoder.classes_)
 
-base_path = "/var/www/html/storage/app/public"
+# Pedir al usuario que ingrese la fecha
+# Calcular automáticamente el día siguiente al mediodía
+mañana = datetime.now() + timedelta(days=1)
+mañana_mediodia = mañana.replace(hour=12, minute=0, second=0, microsecond=0)
 
-model = load_model(os.path.join(base_path, "modelo_clima.h5"), custom_objects={'mse': MeanSquaredError()})
-label_encoder = joblib.load(os.path.join(base_path, "label_encoder_sky.pkl"))
-scaler_X = joblib.load(os.path.join(base_path, "scaler_X.pkl"))
-scaler_y = joblib.load(os.path.join(base_path, "scaler_y.pkl"))
-print(label_encoder.classes_)
+hora = mañana_mediodia.hour
+dia = mañana_mediodia.day
+mes = mañana_mediodia.month
 
-# Obtener la fecha y hora actual
-now = datetime.now()
 
-# Crear una lista con las dos horas siguientes
-predicciones_horas = [(now + timedelta(hours=i)).replace(minute=0, second=0, microsecond=0) for i in range(1, 3)]
-
-# Preparar las entradas para las predicciones
-entradas = []
-for prediccion_hora in predicciones_horas:
-    hora = prediccion_hora.hour
-    dia = prediccion_hora.day
-    mes = prediccion_hora.month
-    entradas.append([hora, dia, mes])
 
 # Preparar el input
 entrada = np.array([[hora, dia, mes]])
@@ -35,23 +30,25 @@ entrada_df = pd.DataFrame(entrada, columns=['hour', 'day', 'month'])
 entrada_escalada = scaler_X.transform(entrada_df)
 
 # Hacer la predicción
-prediccion_escalada = model.predict(entrada_escalada)
-prediccion = scaler_y.inverse_transform(prediccion_escalada)
+pred_reg, pred_cat = model.predict(entrada_escalada)
 
-# Mostrar resultados
-temperatura, humedad, presion, sky_codificado = prediccion[0]
+# Desescalar solo la parte de regresión
+pred_reg_des = scaler_y.inverse_transform(pred_reg)
 
-print(f"TEMPERATURA={temperatura:.2f}")
-print(f"HUMEDAD={humedad:.2f}")
-print(f"PRESION={presion:.2f}")
+temperatura, humedad, presion = pred_reg_des[0]
 
-# Asegurarse que el cielo predicho sea un entero válido
-sky_codificado = np.argmax(prediccion[0][-len(label_encoder.classes_):])
+# Obtener la clase predicha para el cielo
+sky_codificado = np.argmax(pred_cat[0])
+tipo_cielo = label_encoder.inverse_transform([sky_codificado])[0]
 
-# Ahora decodificar
-try:
-    tipo_cielo = label_encoder.inverse_transform([sky_codificado])[0]
-except Exception as e:
-    tipo_cielo = f"Desconocido (código {sky_codificado})"
+# Crear un diccionario con los resultados
+resultados = {
+    'temperatura': float(temperatura),
+    'humedad': float(humedad),
+    'presion': float(presion),
+    'tipo_cielo': tipo_cielo,
+    'fecha': mañana_mediodia.strftime('%Y-%m-%d %H:%M:%S')
+}
 
-print(f"TIPO_CIELO={tipo_cielo}")
+# Devolver los resultados como JSON
+print(json.dumps(resultados, indent=4))
